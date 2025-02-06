@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personalized Age Calculator</title>
+    <title>Important Dates Calculator</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
@@ -15,60 +15,50 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container min-vh-100 d-flex flex-column justify-content-center">
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h1 class="mb-4">Your Age Calculator</h1>
+            <div class="col-md-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Important Dates Calculator</h1>
+                    <button id="addDate" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Date
+                    </button>
+                </div>
 
-                        <div id="ageDisplay" class="age-display mb-4">
-                            <div class="row g-3">
-                                <div class="col">
-                                    <div class="time-unit">
-                                        <span id="years" class="number">0</span>
-                                        <span class="label">Years</span>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="time-unit">
-                                        <span id="months" class="number">0</span>
-                                        <span class="label">Months</span>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="time-unit">
-                                        <span id="days" class="number">0</span>
-                                        <span class="label">Days</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button id="changeBirthday" class="btn btn-outline-primary">
-                            <i class="fas fa-calendar-alt me-2"></i>Change Birthday
-                        </button>
-                    </div>
+                <div id="datesContainer">
+                    <!-- Dynamic content will be inserted here -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Birthday Modal -->
-    <div class="modal fade" id="birthdayModal" tabindex="-1" aria-labelledby="birthdayModalLabel" aria-hidden="true">
+    <!-- Date Modal -->
+    <div class="modal fade" id="dateModal" tabindex="-1" aria-labelledby="dateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="birthdayModalLabel">Set Your Birthday</h5>
+                    <h5 class="modal-title" id="dateModalLabel">Add Important Date</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="birthdayForm">
+                    <form id="dateForm">
                         <div class="mb-3">
-                            <label for="birthdate" class="form-label">Select your birth date:</label>
-                            <input type="date" class="form-control" id="birthdate" required>
+                            <label for="dateName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="dateName" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Birthday</button>
+                        <div class="mb-3">
+                            <label for="dateType" class="form-label">Type</label>
+                            <select class="form-select" id="dateType" required>
+                                <option value="birthday">Birthday</option>
+                                <option value="anniversary">Anniversary</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </form>
                 </div>
             </div>

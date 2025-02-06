@@ -1,108 +1,191 @@
 declare const bootstrap: any;
 
+interface ImportantDate {
+    id: string;
+    name: string;
+    date: Date;
+    type: 'birthday' | 'anniversary' | 'other';
+}
+
 class AgeCalculator {
-    private birthdate: Date | null = null;
+    private dates: ImportantDate[] = [];
     private modal: any;
 
     constructor() {
-        // Initialize when DOM is loaded
         this.initialize();
     }
 
     private initialize(): void {
         // Initialize modal
-        const modalElement = document.getElementById('birthdayModal');
+        const modalElement = document.getElementById('dateModal');
         if (modalElement) {
             this.modal = new bootstrap.Modal(modalElement);
         }
 
-        // Load saved birthdate or show modal
-        const savedBirthdate = localStorage.getItem('birthdate');
-        if (savedBirthdate) {
-            this.birthdate = new Date(savedBirthdate);
-            this.updateAge();
+        // Load saved dates or show modal
+        const savedDates = localStorage.getItem('important_dates');
+        if (savedDates) {
+            this.dates = JSON.parse(savedDates).map((date: any) => ({
+                ...date,
+                date: new Date(date.date)
+            }));
+            this.updateAllAges();
         } else {
-            this.showBirthdayModal();
+            this.showDateModal();
         }
 
         // Set up event listeners
         this.setupEventListeners();
 
-        // Start updating age
-        setInterval(() => this.updateAge(), 1000);
+        // Start updating ages
+        setInterval(() => this.updateAllAges(), 1000);
     }
 
     private setupEventListeners(): void {
-        // Birthday form submission
-        const form = document.getElementById('birthdayForm');
+        // Date form submission
+        const form = document.getElementById('dateForm');
         form?.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.handleBirthdaySubmit();
+            this.handleDateSubmit();
         });
 
-        // Change birthday button
-        const changeBtn = document.getElementById('changeBirthday');
-        changeBtn?.addEventListener('click', () => {
-            this.showBirthdayModal();
+        // Add new date button
+        const addBtn = document.getElementById('addDate');
+        addBtn?.addEventListener('click', () => {
+            this.showDateModal();
         });
     }
 
-    private showBirthdayModal(): void {
+    private showDateModal(dateToEdit?: ImportantDate): void {
         if (this.modal) {
-            if (this.birthdate) {
-                const input = document.getElementById('birthdate') as HTMLInputElement;
-                input.value = this.birthdate.toISOString().split('T')[0];
+            const input = document.getElementById('date') as HTMLInputElement;
+            const nameInput = document.getElementById('dateName') as HTMLInputElement;
+            const typeSelect = document.getElementById('dateType') as HTMLSelectElement;
+
+            if (dateToEdit) {
+                input.value = dateToEdit.date.toISOString().split('T')[0];
+                nameInput.value = dateToEdit.name;
+                typeSelect.value = dateToEdit.type;
+            } else {
+                input.value = '';
+                nameInput.value = '';
+                typeSelect.value = 'birthday';
             }
             this.modal.show();
         }
     }
 
-    private handleBirthdaySubmit(): void {
-        const input = document.getElementById('birthdate') as HTMLInputElement;
-        const newBirthdate = new Date(input.value);
+    private handleDateSubmit(): void {
+        const input = document.getElementById('date') as HTMLInputElement;
+        const nameInput = document.getElementById('dateName') as HTMLInputElement;
+        const typeSelect = document.getElementById('dateType') as HTMLSelectElement;
 
-        if (newBirthdate > new Date()) {
-            alert('Birthday cannot be in the future!');
+        const newDate = new Date(input.value);
+        if (newDate > new Date()) {
+            alert('Date cannot be in the future!');
             return;
         }
 
-        this.birthdate = newBirthdate;
-        localStorage.setItem('birthdate', newBirthdate.toISOString());
+        const importantDate: ImportantDate = {
+            id: Date.now().toString(),
+            name: nameInput.value,
+            date: newDate,
+            type: typeSelect.value as 'birthday' | 'anniversary' | 'other'
+        };
+
+        this.dates.push(importantDate);
+        localStorage.setItem('important_dates', JSON.stringify(this.dates));
         this.modal.hide();
-        this.updateAge();
+        this.updateDisplay();
     }
 
-    private updateAge(): void {
-        if (!this.birthdate) return;
-
+    private calculateAge(date: Date): { years: number; months: number; days: number } {
         const now = new Date();
-        let years = now.getFullYear() - this.birthdate.getFullYear();
-        let months = now.getMonth() - this.birthdate.getMonth();
-        let days = now.getDate() - this.birthdate.getDate();
+        let years = now.getFullYear() - date.getFullYear();
+        let months = now.getMonth() - date.getMonth();
+        let days = now.getDate() - date.getDate();
 
-        // Adjust for negative days
         if (days < 0) {
             months--;
-            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, this.birthdate.getDate());
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, date.getDate());
             days = Math.floor((now.getTime() - lastMonth.getTime()) / (1000 * 60 * 60 * 24));
         }
 
-        // Adjust for negative months
         if (months < 0) {
             years--;
             months += 12;
         }
 
-        // Update display
-        const elements = {
-            years: document.getElementById('years'),
-            months: document.getElementById('months'),
-            days: document.getElementById('days')
-        };
+        return { years, months, days };
+    }
 
-        if (elements.years) elements.years.textContent = years.toString();
-        if (elements.months) elements.months.textContent = months.toString();
-        if (elements.days) elements.days.textContent = days.toString();
+    private updateAllAges(): void {
+        this.dates.forEach((date) => {
+            const age = this.calculateAge(date.date);
+            const dateContainer = document.getElementById(`date-${date.id}`);
+            if (dateContainer) {
+                const yearsEl = dateContainer.querySelector('.years');
+                const monthsEl = dateContainer.querySelector('.months');
+                const daysEl = dateContainer.querySelector('.days');
+
+                if (yearsEl) yearsEl.textContent = age.years.toString();
+                if (monthsEl) monthsEl.textContent = age.months.toString();
+                if (daysEl) daysEl.textContent = age.days.toString();
+            }
+        });
+    }
+
+    private updateDisplay(): void {
+        const container = document.getElementById('datesContainer');
+        if (!container) return;
+
+        container.innerHTML = this.dates.map(date => `
+            <div id="date-${date.id}" class="date-card mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">${date.name}</h5>
+                        <span class="badge bg-${this.getTypeColor(date.type)}">${date.type}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="age-display">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <div class="time-unit">
+                                        <span class="years number">0</span>
+                                        <span class="label">Years</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="time-unit">
+                                        <span class="months number">0</span>
+                                        <span class="label">Months</span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="time-unit">
+                                        <span class="days number">0</span>
+                                        <span class="label">Days</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        this.updateAllAges();
+    }
+
+    private getTypeColor(type: string): string {
+        switch (type) {
+            case 'birthday':
+                return 'primary';
+            case 'anniversary':
+                return 'success';
+            default:
+                return 'info';
+        }
     }
 }
 
