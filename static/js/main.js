@@ -14,24 +14,35 @@ class AgeCalculator {
         this.initialize();
     }
     initialize() {
-        // Initialize modal
-        const modalElement = document.getElementById('dateModal');
-        if (modalElement) {
-            this.modal = new bootstrap.Modal(modalElement);
-        }
-        // Load saved dates or show modal
-        const savedDates = localStorage.getItem('important_dates');
-        if (savedDates) {
-            this.dates = JSON.parse(savedDates).map((date) => (Object.assign(Object.assign({}, date), { date: new Date(date.date) })));
-            this.updateAllAges();
-        }
-        else {
-            this.showDateModal();
-        }
-        // Set up event listeners
-        this.setupEventListeners();
-        // Start updating ages
-        setInterval(() => this.updateAllAges(), 1000);
+        return __awaiter(this, void 0, void 0, function* () {
+            // Initialize modal
+            const modalElement = document.getElementById('dateModal');
+            if (modalElement) {
+                this.modal = new bootstrap.Modal(modalElement);
+            }
+            // Set up event listeners
+            this.setupEventListeners();
+            // Load dates from server
+            yield this.loadDates();
+            // Start updating ages
+            setInterval(() => this.updateAllAges(), 1000);
+        });
+    }
+    loadDates() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield fetch('/dates');
+                if (!response.ok) {
+                    throw new Error('Failed to load dates');
+                }
+                this.dates = yield response.json();
+                this.updateDisplay();
+            }
+            catch (error) {
+                console.error('Error loading dates:', error);
+                alert('Error loading dates. Please try again.');
+            }
+        });
     }
     setupEventListeners() {
         // Date form submission
@@ -45,6 +56,17 @@ class AgeCalculator {
         addBtn === null || addBtn === void 0 ? void 0 : addBtn.addEventListener('click', () => {
             this.showDateModal();
         });
+        // Delete date event delegation
+        const container = document.getElementById('datesContainer');
+        container === null || container === void 0 ? void 0 : container.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('delete-date')) {
+                const dateId = target.getAttribute('data-id');
+                if (dateId) {
+                    this.handleDateDelete(parseInt(dateId));
+                }
+            }
+        });
     }
     handleDateSubmit() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -57,57 +79,65 @@ class AgeCalculator {
                 return;
             }
             try {
-                // 获取农历日期
-                const response = yield fetch('/get_lunar_date', {
+                const response = yield fetch('/dates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        date: input.value
+                        name: nameInput.value,
+                        date: input.value,
+                        type: typeSelect.value
                     })
                 });
                 if (!response.ok) {
-                    throw new Error('Failed to get lunar date');
+                    throw new Error('Failed to add date');
                 }
-                const lunarData = yield response.json();
-                const importantDate = {
-                    id: Date.now().toString(),
-                    name: nameInput.value,
-                    date: newDate,
-                    type: typeSelect.value,
-                    lunarDate: lunarData.lunar_date
-                };
-                this.dates.push(importantDate);
-                localStorage.setItem('important_dates', JSON.stringify(this.dates));
+                const addedDate = yield response.json();
+                this.dates.push(addedDate);
                 this.modal.hide();
                 this.updateDisplay();
             }
             catch (error) {
-                console.error('Error getting lunar date:', error);
-                alert('Error getting lunar date. Please try again.');
+                console.error('Error adding date:', error);
+                alert('Error adding date. Please try again.');
             }
         });
     }
-    showDateModal(dateToEdit) {
+    handleDateDelete(dateId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!confirm('Are you sure you want to delete this date?')) {
+                return;
+            }
+            try {
+                const response = yield fetch(`/dates/${dateId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to delete date');
+                }
+                this.dates = this.dates.filter(date => date.id !== dateId);
+                this.updateDisplay();
+            }
+            catch (error) {
+                console.error('Error deleting date:', error);
+                alert('Error deleting date. Please try again.');
+            }
+        });
+    }
+    showDateModal() {
         if (this.modal) {
             const input = document.getElementById('date');
             const nameInput = document.getElementById('dateName');
             const typeSelect = document.getElementById('dateType');
-            if (dateToEdit) {
-                input.value = dateToEdit.date.toISOString().split('T')[0];
-                nameInput.value = dateToEdit.name;
-                typeSelect.value = dateToEdit.type;
-            }
-            else {
-                input.value = '';
-                nameInput.value = '';
-                typeSelect.value = 'birthday';
-            }
+            input.value = '';
+            nameInput.value = '';
+            typeSelect.value = 'birthday';
             this.modal.show();
         }
     }
-    calculateAge(date) {
+    calculateAge(dateStr) {
+        const date = new Date(dateStr);
         const now = new Date();
         let years = now.getFullYear() - date.getFullYear();
         let months = now.getMonth() - date.getMonth();
@@ -151,11 +181,16 @@ class AgeCalculator {
                         <div>
                             <h5 class="mb-0">${date.name}</h5>
                             <small class="text-muted">
-                                ${date.date.toLocaleDateString()} 
-                                ${date.lunarDate ? `(农历: ${date.lunarDate})` : ''}
+                                ${new Date(date.date).toLocaleDateString()} 
+                                ${date.lunar_date ? `(农历: ${date.lunar_date})` : ''}
                             </small>
                         </div>
-                        <span class="badge bg-${this.getTypeColor(date.type)}">${date.type}</span>
+                        <div>
+                            <span class="badge bg-${this.getTypeColor(date.type)} me-2">${date.type}</span>
+                            <button class="btn btn-sm btn-outline-danger delete-date" data-id="${date.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="age-display">

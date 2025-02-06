@@ -1,11 +1,11 @@
 declare const bootstrap: any;
 
 interface ImportantDate {
-    id: string;
+    id: number;
     name: string;
-    date: Date;
+    date: string;
     type: 'birthday' | 'anniversary' | 'other';
-    lunarDate?: string;  // 农历日期字符串
+    lunar_date?: string;
 }
 
 class AgeCalculator {
@@ -16,30 +16,35 @@ class AgeCalculator {
         this.initialize();
     }
 
-    private initialize(): void {
+    private async initialize(): Promise<void> {
         // Initialize modal
         const modalElement = document.getElementById('dateModal');
         if (modalElement) {
             this.modal = new bootstrap.Modal(modalElement);
         }
 
-        // Load saved dates or show modal
-        const savedDates = localStorage.getItem('important_dates');
-        if (savedDates) {
-            this.dates = JSON.parse(savedDates).map((date: any) => ({
-                ...date,
-                date: new Date(date.date)
-            }));
-            this.updateAllAges();
-        } else {
-            this.showDateModal();
-        }
-
         // Set up event listeners
         this.setupEventListeners();
 
+        // Load dates from server
+        await this.loadDates();
+
         // Start updating ages
         setInterval(() => this.updateAllAges(), 1000);
+    }
+
+    private async loadDates(): Promise<void> {
+        try {
+            const response = await fetch('/dates');
+            if (!response.ok) {
+                throw new Error('Failed to load dates');
+            }
+            this.dates = await response.json();
+            this.updateDisplay();
+        } catch (error) {
+            console.error('Error loading dates:', error);
+            alert('Error loading dates. Please try again.');
+        }
     }
 
     private setupEventListeners(): void {
@@ -55,6 +60,18 @@ class AgeCalculator {
         addBtn?.addEventListener('click', () => {
             this.showDateModal();
         });
+
+        // Delete date event delegation
+        const container = document.getElementById('datesContainer');
+        container?.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('delete-date')) {
+                const dateId = target.getAttribute('data-id');
+                if (dateId) {
+                    this.handleDateDelete(parseInt(dateId));
+                }
+            }
+        });
     }
 
     private async handleDateSubmit(): Promise<void> {
@@ -69,61 +86,70 @@ class AgeCalculator {
         }
 
         try {
-            // 获取农历日期
-            const response = await fetch('/get_lunar_date', {
+            const response = await fetch('/dates', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    date: input.value
+                    name: nameInput.value,
+                    date: input.value,
+                    type: typeSelect.value
                 })
             });
 
             if (!response.ok) {
-                throw new Error('Failed to get lunar date');
+                throw new Error('Failed to add date');
             }
 
-            const lunarData = await response.json();
-
-            const importantDate: ImportantDate = {
-                id: Date.now().toString(),
-                name: nameInput.value,
-                date: newDate,
-                type: typeSelect.value as 'birthday' | 'anniversary' | 'other',
-                lunarDate: lunarData.lunar_date
-            };
-
-            this.dates.push(importantDate);
-            localStorage.setItem('important_dates', JSON.stringify(this.dates));
+            const addedDate = await response.json();
+            this.dates.push(addedDate);
             this.modal.hide();
             this.updateDisplay();
         } catch (error) {
-            console.error('Error getting lunar date:', error);
-            alert('Error getting lunar date. Please try again.');
+            console.error('Error adding date:', error);
+            alert('Error adding date. Please try again.');
         }
     }
 
-    private showDateModal(dateToEdit?: ImportantDate): void {
+    private async handleDateDelete(dateId: number): Promise<void> {
+        if (!confirm('Are you sure you want to delete this date?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/dates/${dateId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete date');
+            }
+
+            this.dates = this.dates.filter(date => date.id !== dateId);
+            this.updateDisplay();
+        } catch (error) {
+            console.error('Error deleting date:', error);
+            alert('Error deleting date. Please try again.');
+        }
+    }
+
+    private showDateModal(): void {
         if (this.modal) {
             const input = document.getElementById('date') as HTMLInputElement;
             const nameInput = document.getElementById('dateName') as HTMLInputElement;
             const typeSelect = document.getElementById('dateType') as HTMLSelectElement;
 
-            if (dateToEdit) {
-                input.value = dateToEdit.date.toISOString().split('T')[0];
-                nameInput.value = dateToEdit.name;
-                typeSelect.value = dateToEdit.type;
-            } else {
-                input.value = '';
-                nameInput.value = '';
-                typeSelect.value = 'birthday';
-            }
+            input.value = '';
+            nameInput.value = '';
+            typeSelect.value = 'birthday';
+
             this.modal.show();
         }
     }
 
-    private calculateAge(date: Date): { years: number; months: number; days: number } {
+    private calculateAge(dateStr: string): { years: number; months: number; days: number } {
+        const date = new Date(dateStr);
         const now = new Date();
         let years = now.getFullYear() - date.getFullYear();
         let months = now.getMonth() - date.getMonth();
@@ -170,11 +196,16 @@ class AgeCalculator {
                         <div>
                             <h5 class="mb-0">${date.name}</h5>
                             <small class="text-muted">
-                                ${date.date.toLocaleDateString()} 
-                                ${date.lunarDate ? `(农历: ${date.lunarDate})` : ''}
+                                ${new Date(date.date).toLocaleDateString()} 
+                                ${date.lunar_date ? `(农历: ${date.lunar_date})` : ''}
                             </small>
                         </div>
-                        <span class="badge bg-${this.getTypeColor(date.type)}">${date.type}</span>
+                        <div>
+                            <span class="badge bg-${this.getTypeColor(date.type)} me-2">${date.type}</span>
+                            <button class="btn btn-sm btn-outline-danger delete-date" data-id="${date.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="age-display">
