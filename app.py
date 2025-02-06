@@ -30,16 +30,36 @@ def get_lunar_date():
         # Chinese number mapping
         chinese_numbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 
-        def num_to_chinese(num):
-            if num <= 10:
-                return chinese_numbers[num]
-            elif num < 20:
-                return f"十{chinese_numbers[num-10]}" if num > 10 else "十"
+        def get_year_chinese(year):
+            result = ''
+            for digit in str(year):
+                result += chinese_numbers[int(digit)]
+            return result
+
+        def get_month_chinese(month):
+            if month == 1:
+                return '正'
+            elif month <= 10:
+                return chinese_numbers[month]
             else:
-                return f"{chinese_numbers[num//10]}十{chinese_numbers[num%10]}" if num % 10 != 0 else f"{chinese_numbers[num//10]}十"
+                return '十' + ('' if month == 10 else chinese_numbers[month-10])
+
+        def get_day_chinese(day):
+            if day <= 10:
+                return '初' + chinese_numbers[day]
+            elif day < 20:
+                return '十' + ('' if day == 10 else chinese_numbers[day-10])
+            elif day == 20:
+                return '二十'
+            elif day < 30:
+                return '廿' + chinese_numbers[day-20]
+            elif day == 30:
+                return '三十'
+            else:
+                return '三十' + chinese_numbers[day-30]
 
         # Format lunar date string with Chinese characters
-        lunar_str = f"{num_to_chinese(lunar.year)}年{num_to_chinese(lunar.month)}月{num_to_chinese(lunar.day)}日"
+        lunar_str = f"{get_year_chinese(lunar.year)}年{get_month_chinese(lunar.month)}月{get_day_chinese(lunar.day)}日"
 
         return jsonify({
             'lunar_date': lunar_str
