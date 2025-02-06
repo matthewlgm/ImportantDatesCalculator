@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 class AgeCalculator {
     constructor() {
         this.dates = [];
@@ -37,6 +46,49 @@ class AgeCalculator {
             this.showDateModal();
         });
     }
+    handleDateSubmit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const input = document.getElementById('date');
+            const nameInput = document.getElementById('dateName');
+            const typeSelect = document.getElementById('dateType');
+            const newDate = new Date(input.value);
+            if (newDate > new Date()) {
+                alert('Date cannot be in the future!');
+                return;
+            }
+            try {
+                // 获取农历日期
+                const response = yield fetch('/get_lunar_date', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        date: input.value
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to get lunar date');
+                }
+                const lunarData = yield response.json();
+                const importantDate = {
+                    id: Date.now().toString(),
+                    name: nameInput.value,
+                    date: newDate,
+                    type: typeSelect.value,
+                    lunarDate: lunarData.lunar_date
+                };
+                this.dates.push(importantDate);
+                localStorage.setItem('important_dates', JSON.stringify(this.dates));
+                this.modal.hide();
+                this.updateDisplay();
+            }
+            catch (error) {
+                console.error('Error getting lunar date:', error);
+                alert('Error getting lunar date. Please try again.');
+            }
+        });
+    }
     showDateModal(dateToEdit) {
         if (this.modal) {
             const input = document.getElementById('date');
@@ -54,26 +106,6 @@ class AgeCalculator {
             }
             this.modal.show();
         }
-    }
-    handleDateSubmit() {
-        const input = document.getElementById('date');
-        const nameInput = document.getElementById('dateName');
-        const typeSelect = document.getElementById('dateType');
-        const newDate = new Date(input.value);
-        if (newDate > new Date()) {
-            alert('Date cannot be in the future!');
-            return;
-        }
-        const importantDate = {
-            id: Date.now().toString(),
-            name: nameInput.value,
-            date: newDate,
-            type: typeSelect.value
-        };
-        this.dates.push(importantDate);
-        localStorage.setItem('important_dates', JSON.stringify(this.dates));
-        this.modal.hide();
-        this.updateDisplay();
     }
     calculateAge(date) {
         const now = new Date();
@@ -116,7 +148,13 @@ class AgeCalculator {
             <div id="date-${date.id}" class="date-card mb-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">${date.name}</h5>
+                        <div>
+                            <h5 class="mb-0">${date.name}</h5>
+                            <small class="text-muted">
+                                ${date.date.toLocaleDateString()} 
+                                ${date.lunarDate ? `(农历: ${date.lunarDate})` : ''}
+                            </small>
+                        </div>
                         <span class="badge bg-${this.getTypeColor(date.type)}">${date.type}</span>
                     </div>
                     <div class="card-body">

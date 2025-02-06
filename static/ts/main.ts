@@ -5,6 +5,7 @@ interface ImportantDate {
     name: string;
     date: Date;
     type: 'birthday' | 'anniversary' | 'other';
+    lunarDate?: string;  // 农历日期字符串
 }
 
 class AgeCalculator {
@@ -56,6 +57,53 @@ class AgeCalculator {
         });
     }
 
+    private async handleDateSubmit(): Promise<void> {
+        const input = document.getElementById('date') as HTMLInputElement;
+        const nameInput = document.getElementById('dateName') as HTMLInputElement;
+        const typeSelect = document.getElementById('dateType') as HTMLSelectElement;
+
+        const newDate = new Date(input.value);
+        if (newDate > new Date()) {
+            alert('Date cannot be in the future!');
+            return;
+        }
+
+        try {
+            // 获取农历日期
+            const response = await fetch('/get_lunar_date', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: input.value
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get lunar date');
+            }
+
+            const lunarData = await response.json();
+
+            const importantDate: ImportantDate = {
+                id: Date.now().toString(),
+                name: nameInput.value,
+                date: newDate,
+                type: typeSelect.value as 'birthday' | 'anniversary' | 'other',
+                lunarDate: lunarData.lunar_date
+            };
+
+            this.dates.push(importantDate);
+            localStorage.setItem('important_dates', JSON.stringify(this.dates));
+            this.modal.hide();
+            this.updateDisplay();
+        } catch (error) {
+            console.error('Error getting lunar date:', error);
+            alert('Error getting lunar date. Please try again.');
+        }
+    }
+
     private showDateModal(dateToEdit?: ImportantDate): void {
         if (this.modal) {
             const input = document.getElementById('date') as HTMLInputElement;
@@ -73,30 +121,6 @@ class AgeCalculator {
             }
             this.modal.show();
         }
-    }
-
-    private handleDateSubmit(): void {
-        const input = document.getElementById('date') as HTMLInputElement;
-        const nameInput = document.getElementById('dateName') as HTMLInputElement;
-        const typeSelect = document.getElementById('dateType') as HTMLSelectElement;
-
-        const newDate = new Date(input.value);
-        if (newDate > new Date()) {
-            alert('Date cannot be in the future!');
-            return;
-        }
-
-        const importantDate: ImportantDate = {
-            id: Date.now().toString(),
-            name: nameInput.value,
-            date: newDate,
-            type: typeSelect.value as 'birthday' | 'anniversary' | 'other'
-        };
-
-        this.dates.push(importantDate);
-        localStorage.setItem('important_dates', JSON.stringify(this.dates));
-        this.modal.hide();
-        this.updateDisplay();
     }
 
     private calculateAge(date: Date): { years: number; months: number; days: number } {
@@ -143,7 +167,13 @@ class AgeCalculator {
             <div id="date-${date.id}" class="date-card mb-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">${date.name}</h5>
+                        <div>
+                            <h5 class="mb-0">${date.name}</h5>
+                            <small class="text-muted">
+                                ${date.date.toLocaleDateString()} 
+                                ${date.lunarDate ? `(农历: ${date.lunarDate})` : ''}
+                            </small>
+                        </div>
                         <span class="badge bg-${this.getTypeColor(date.type)}">${date.type}</span>
                     </div>
                     <div class="card-body">
