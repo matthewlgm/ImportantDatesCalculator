@@ -8,7 +8,7 @@ interface AgeData {
 
 class AgeCalculator {
     private birthdate: Date | null = null;
-    private modal: bootstrap.Modal;
+    private modal: bootstrap.Modal | null = null;
     private updateInterval: number | null = null;
 
     constructor() {
@@ -20,7 +20,10 @@ class AgeCalculator {
     private initializeModal(): void {
         const modalElement = document.getElementById('birthdayModal');
         if (modalElement) {
-            this.modal = new bootstrap.Modal(modalElement);
+            this.modal = new bootstrap.Modal(modalElement, {
+                keyboard: false,
+                backdrop: 'static'
+            });
         }
     }
 
@@ -30,13 +33,16 @@ class AgeCalculator {
             this.birthdate = new Date(savedBirthdate);
             this.startUpdating();
         } else {
-            this.showBirthdayModal();
+            // 确保模态框已初始化
+            setTimeout(() => {
+                this.showBirthdayModal();
+            }, 500);
         }
     }
 
     private setupEventListeners(): void {
         // Birthday form submission
-        const birthdayForm = document.getElementById('birthdayForm') as HTMLFormElement;
+        const birthdayForm = document.getElementById('birthdayForm');
         birthdayForm?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleBirthdaySubmit();
@@ -50,6 +56,11 @@ class AgeCalculator {
     }
 
     private showBirthdayModal(): void {
+        if (!this.modal) {
+            console.error('Modal not initialized');
+            return;
+        }
+
         if (this.birthdate) {
             const birthdateInput = document.getElementById('birthdate') as HTMLInputElement;
             birthdateInput.value = this.birthdate.toISOString().split('T')[0];
@@ -68,7 +79,7 @@ class AgeCalculator {
 
         this.birthdate = newBirthdate;
         localStorage.setItem('birthdate', newBirthdate.toISOString());
-        this.modal.hide();
+        this.modal?.hide();
         this.startUpdating();
     }
 
@@ -99,9 +110,13 @@ class AgeCalculator {
     private updateDisplay(): void {
         const age = this.calculateAge();
 
-        document.getElementById('years')!.textContent = age.years.toString();
-        document.getElementById('months')!.textContent = age.months.toString();
-        document.getElementById('days')!.textContent = age.days.toString();
+        const yearsElement = document.getElementById('years');
+        const monthsElement = document.getElementById('months');
+        const daysElement = document.getElementById('days');
+
+        if (yearsElement) yearsElement.textContent = age.years.toString();
+        if (monthsElement) monthsElement.textContent = age.months.toString();
+        if (daysElement) daysElement.textContent = age.days.toString();
     }
 
     private startUpdating(): void {

@@ -4,6 +4,7 @@ var bootstrap = require("bootstrap");
 var AgeCalculator = /** @class */ (function () {
     function AgeCalculator() {
         this.birthdate = null;
+        this.modal = null;
         this.updateInterval = null;
         this.initializeModal();
         this.loadBirthdate();
@@ -12,17 +13,24 @@ var AgeCalculator = /** @class */ (function () {
     AgeCalculator.prototype.initializeModal = function () {
         var modalElement = document.getElementById('birthdayModal');
         if (modalElement) {
-            this.modal = new bootstrap.Modal(modalElement);
+            this.modal = new bootstrap.Modal(modalElement, {
+                keyboard: false,
+                backdrop: 'static'
+            });
         }
     };
     AgeCalculator.prototype.loadBirthdate = function () {
+        var _this = this;
         var savedBirthdate = localStorage.getItem('birthdate');
         if (savedBirthdate) {
             this.birthdate = new Date(savedBirthdate);
             this.startUpdating();
         }
         else {
-            this.showBirthdayModal();
+            // 确保模态框已初始化
+            setTimeout(function () {
+                _this.showBirthdayModal();
+            }, 500);
         }
     };
     AgeCalculator.prototype.setupEventListeners = function () {
@@ -40,6 +48,10 @@ var AgeCalculator = /** @class */ (function () {
         });
     };
     AgeCalculator.prototype.showBirthdayModal = function () {
+        if (!this.modal) {
+            console.error('Modal not initialized');
+            return;
+        }
         if (this.birthdate) {
             var birthdateInput = document.getElementById('birthdate');
             birthdateInput.value = this.birthdate.toISOString().split('T')[0];
@@ -47,6 +59,7 @@ var AgeCalculator = /** @class */ (function () {
         this.modal.show();
     };
     AgeCalculator.prototype.handleBirthdaySubmit = function () {
+        var _a;
         var birthdateInput = document.getElementById('birthdate');
         var newBirthdate = new Date(birthdateInput.value);
         if (newBirthdate > new Date()) {
@@ -55,7 +68,7 @@ var AgeCalculator = /** @class */ (function () {
         }
         this.birthdate = newBirthdate;
         localStorage.setItem('birthdate', newBirthdate.toISOString());
-        this.modal.hide();
+        (_a = this.modal) === null || _a === void 0 ? void 0 : _a.hide();
         this.startUpdating();
     };
     AgeCalculator.prototype.calculateAge = function () {
@@ -79,9 +92,15 @@ var AgeCalculator = /** @class */ (function () {
     };
     AgeCalculator.prototype.updateDisplay = function () {
         var age = this.calculateAge();
-        document.getElementById('years').textContent = age.years.toString();
-        document.getElementById('months').textContent = age.months.toString();
-        document.getElementById('days').textContent = age.days.toString();
+        var yearsElement = document.getElementById('years');
+        var monthsElement = document.getElementById('months');
+        var daysElement = document.getElementById('days');
+        if (yearsElement)
+            yearsElement.textContent = age.years.toString();
+        if (monthsElement)
+            monthsElement.textContent = age.months.toString();
+        if (daysElement)
+            daysElement.textContent = age.days.toString();
     };
     AgeCalculator.prototype.startUpdating = function () {
         var _this = this;
