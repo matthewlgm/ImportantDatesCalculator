@@ -31,7 +31,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx tsc static/ts/main.ts --outDir static/js && python main.py"
+args = "npx tsc && python main.py"
 waitForPort = 5000
 
 [[ports]]
