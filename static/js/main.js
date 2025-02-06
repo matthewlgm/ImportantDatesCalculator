@@ -187,8 +187,8 @@ class AgeCalculator {
                         </div>
                         <div>
                             <span class="badge bg-${this.getTypeColor(date.type)} me-2">${date.type}</span>
-                            <button class="btn btn-link text-muted p-0 border-0 delete-date" title="删除" data-id="${date.id}">
-                                <i class="fas fa-times"></i>
+                            <button class="btn btn-sm btn-outline-danger delete-date" data-id="${date.id}">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
