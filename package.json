@@ -1,16 +1,17 @@
 {
-  "name": "workspace",
+  "name": "importantdatescalculator",
   "version": "1.0.0",
+  "description": "A Flask app for calculating and tracking important dates.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
+  "devDependencies": {
     "@types/bootstrap": "^5.2.10",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   }
 }

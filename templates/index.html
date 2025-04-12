@@ -1,55 +1,156 @@
 <!DOCTYPE html>
+<!-- 声明文档类型为 HTML -->
 <html lang="en" data-bs-theme="dark">
+<!--
+  - html 标签是 HTML 文档的根元素
+  - lang="en" 表示该网页的语言为英语
+  - data-bs-theme="dark" 表示使用 Bootstrap 的深色主题
+-->
 <head>
+    <!-- head 标签包含文档的元数据，例如字符集、视口设置和标题 -->
     <meta charset="UTF-8">
+    <!-- 设置字符编码为 UTF-8，支持显示各种字符 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--
+      - 设置视口宽度为设备宽度
+      - initial-scale=1.0 表示初始缩放比例为 1.0，即不缩放
+    -->
     <title>Important Dates Calculator</title>
+    <!-- 设置网页标题，显示在浏览器的标签页上 -->
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- 引入 Bootstrap CSS 样式表，用于快速构建响应式网页 -->
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 引入自定义 CSS 样式表，用于覆盖或扩展 Bootstrap 的样式 -->
+    <!-- url_for('static', filename='css/style.css') 是 Flask 框架提供的函数，用于生成静态文件的 URL -->
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Font Awesome 字体图标库，提供各种常用的图标 -->
 </head>
 <body>
+    <!-- body 标签包含网页的可见内容 -->
     <div class="container py-5">
+        <!--
+          - container 类是 Bootstrap 提供的容器类，用于设置网页内容的最大宽度
+          - py-5 类是 Bootstrap 提供的 padding 类，用于设置上下内边距为 5 个单位
+        -->
         <div class="row justify-content-center">
+            <!--
+              - row 类是 Bootstrap 提供的行类，用于创建水平的行
+              - justify-content-center 类是 Bootstrap 提供的类，用于将内容在水平方向上居中对齐
+            -->
             <div class="col-md-10">
+                <!--
+                  - col-md-10 类是 Bootstrap 提供的列类，用于创建列
+                  - md 表示中等尺寸的屏幕，10 表示该列占据 10/12 的宽度
+                -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
+                    <!--
+                      - d-flex 类是 Bootstrap 提供的 flex 布局类，用于创建 flex 容器
+                      - justify-content-between 类是 Bootstrap 提供的类，用于将内容在水平方向上两端对齐
+                      - align-items-center 类是 Bootstrap 提供的类，用于将内容在垂直方向上居中对齐
+                      - mb-4 类是 Bootstrap 提供的 margin 类，用于设置下外边距为 4 个单位
+                    -->
                     <h1>Important Dates Calculator</h1>
+                    <!-- h1 标签表示一级标题 -->
                     <button id="addDate" class="btn btn-primary">
+                        <!--
+                          - button 标签表示按钮
+                          - id="addDate" 设置按钮的 ID 为 addDate，方便 JavaScript 代码获取该按钮
+                          - class="btn btn-primary" 设置按钮的样式为 Bootstrap 的主要按钮样式
+                        -->
                         <i class="fas fa-plus me-2"></i>Add New Date
+                        <!--
+                          - i 标签表示图标
+                          - class="fas fa-plus me-2" 设置图标为 Font Awesome 的加号图标，并设置右外边距为 2 个单位
+                        -->
                     </button>
                 </div>
 
                 <div id="datesContainer">
                     <!-- Dynamic content will be inserted here -->
+                    <!--
+                      - div 标签表示一个容器
+                      - id="datesContainer" 设置容器的 ID 为 datesContainer，方便 JavaScript 代码将动态内容插入到该容器中
+                    -->
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Date Modal -->
+    <!-- 模态框（Modal）是 Bootstrap 提供的弹出框组件，用于显示额外的信息或执行某些操作 -->
     <div class="modal fade" id="dateModal" tabindex="-1" aria-labelledby="dateModalLabel" aria-hidden="true">
+        <!--
+          - modal 类是 Bootstrap 提供的模态框类
+          - fade 类是 Bootstrap 提供的动画类，用于在模态框显示和隐藏时添加淡入淡出效果
+          - id="dateModal" 设置模态框的 ID 为 dateModal，方便 JavaScript 代码控制模态框的显示和隐藏
+          - tabindex="-1" 表示该元素不能通过 Tab 键获取焦点
+          - aria-labelledby="dateModalLabel" 设置模态框的标题，与模态框头部的 h5 标签的 ID 关联
+          - aria-hidden="true" 表示该元素对屏幕阅读器不可见
+        -->
         <div class="modal-dialog">
+            <!-- modal-dialog 类是 Bootstrap 提供的类，用于设置模态框的对话框 -->
             <div class="modal-content">
+                <!-- modal-content 类是 Bootstrap 提供的类，用于设置模态框的内容 -->
                 <div class="modal-header">
+                    <!-- modal-header 类是 Bootstrap 提供的类，用于设置模态框的头部 -->
                     <h5 class="modal-title" id="dateModalLabel">Add Important Date</h5>
+                    <!--
+                      - modal-title 类是 Bootstrap 提供的类，用于设置模态框的标题
+                      - id="dateModalLabel" 设置标题的 ID 为 dateModalLabel，与模态框的 aria-labelledby 属性关联
+                    -->
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <!--
+                      - button 标签表示按钮
+                      - type="button" 设置按钮的类型为 button，防止按钮触发表单提交
+                      - class="btn-close" 设置按钮的样式为 Bootstrap 的关闭按钮样式
+                      - data-bs-dismiss="modal" 设置按钮的功能为关闭模态框
+                      - aria-label="Close" 设置按钮的标签，方便屏幕阅读器识别
+                    -->
                 </div>
                 <div class="modal-body">
+                    <!-- modal-body 类是 Bootstrap 提供的类，用于设置模态框的主体内容 -->
                     <form id="dateForm">
+                        <!--
+                          - form 标签表示表单
+                          - id="dateForm" 设置表单的 ID 为 dateForm，方便 JavaScript 代码获取该表单
+                        -->
                         <div class="mb-3">
+                            <!-- mb-3 类是 Bootstrap 提供的 margin 类，用于设置下外边距为 3 个单位 -->
                             <label for="dateName" class="form-label">Name</label>
+                            <!--
+                              - label 标签表示标签
+                              - for="dateName" 设置标签与 id 为 dateName 的输入框关联
+                              - class="form-label" 设置标签的样式为 Bootstrap 的表单标签样式
+                            -->
                             <input type="text" class="form-control" id="dateName" required>
+                            <!--
+                              - input 标签表示输入框
+                              - type="text" 设置输入框的类型为文本
+                              - class="form-control" 设置输入框的样式为 Bootstrap 的表单控件样式
+                              - id="dateName" 设置输入框的 ID 为 dateName，方便 JavaScript 代码获取输入框的值
+                              - required 属性表示该输入框为必填项
+                            -->
                         </div>
                         <div class="mb-3">
                             <label for="dateType" class="form-label">Type</label>
                             <select class="form-select" id="dateType" required>
+                                <!--
+                                  - select 标签表示下拉选择框
+                                  - class="form-select" 设置下拉选择框的样式为 Bootstrap 的表单选择框样式
+                                  - id="dateType" 设置下拉选择框的 ID 为 dateType，方便 JavaScript 代码获取选择框的值
+                                  - required 属性表示该选择框为必选项
+                                -->
                                 <option value="birthday">Birthday</option>
+                                <!--
+                                  - option 标签表示下拉选择框的选项
+                                  - value="birthday" 设置选项的值为 birthday
+                                -->
                                 <option value="anniversary">Anniversary</option>
                                 <option value="other">Other</option>
                             </select>
@@ -57,8 +158,20 @@
                         <div class="mb-3">
                             <label for="date" class="form-label">Date</label>
                             <input type="date" class="form-control" id="date" required>
+                            <!--
+                              - input 标签表示输入框
+                              - type="date" 设置输入框的类型为日期
+                              - class="form-control" 设置输入框的样式为 Bootstrap 的表单控件样式
+                              - id="date" 设置输入框的 ID 为 date，方便 JavaScript 代码获取输入框的值
+                              - required 属性表示该输入框为必填项
+                            -->
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
+                        <!--
+                          - button 标签表示按钮
+                          - type="submit" 设置按钮的类型为 submit，用于提交表单
+                          - class="btn btn-primary" 设置按钮的样式为 Bootstrap 的主要按钮样式
+                        -->
                     </form>
                 </div>
             </div>
@@ -67,8 +180,12 @@
 
     <!-- Bootstrap Bundle JS (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入 Bootstrap 的 JavaScript 文件，包含了 Bootstrap 的各种组件和插件 -->
+    <!-- Bootstrap Bundle JS 包含了 Popper.js，用于支持弹出框等组件 -->
 
     <!-- TypeScript compiled file -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- 引入 TypeScript 编译后的 JavaScript 文件，包含了网页的交互逻辑 -->
+    <!-- url_for('static', filename='js/main.js') 是 Flask 框架提供的函数，用于生成静态文件的 URL -->
 </body>
 </html>

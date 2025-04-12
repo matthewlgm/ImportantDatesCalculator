@@ -1,47 +1,55 @@
+/*  .age-display 类用于设置年龄显示区域的样式 */
 .age-display {
-    padding: 2rem;
-    border-radius: 1rem;
-    background: var(--bs-dark);
-    margin: 2rem 0;
+    padding: 2rem; /* 内边距，即内容与边框之间的距离，2rem 表示 2 倍的根字体大小 */
+    border-radius: 1rem; /* 边框圆角，1rem 表示 1 倍的根字体大小，值越大，圆角越明显 */
+    background: var(--bs-dark); /* 背景颜色，使用 Bootstrap 的变量 --bs-dark，通常表示深色背景 */
+    margin: 2rem 0; /* 外边距，即元素与周围元素之间的距离，上下外边距为 2rem，左右外边距为 0 */
 }
 
+/* .time-unit 类用于设置时间单位（年、月、日）的样式 */
 .time-unit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
+    display: flex; /* 使用 flex 布局，使子元素可以灵活排列 */
+    flex-direction: column; /* 设置 flex 布局的主轴方向为垂直方向，即子元素垂直排列 */
+    align-items: center; /* 设置子元素在交叉轴方向上居中对齐 */
+    padding: 1rem; /* 内边距，1rem 表示 1 倍的根字体大小 */
 }
 
+/* .number 类用于设置数字（年龄值）的样式 */
 .number {
-    font-size: 3rem;
-    font-weight: bold;
-    color: var(--bs-primary);
-    margin-bottom: 0.5rem;
+    font-size: 3rem; /* 字体大小，3rem 表示 3 倍的根字体大小 */
+    font-weight: bold; /* 字体粗细，bold 表示加粗 */
+    color: var(--bs-primary); /* 字体颜色，使用 Bootstrap 的变量 --bs-primary，通常表示主题色 */
+    margin-bottom: 0.5rem; /* 下外边距，0.5rem 表示 0.5 倍的根字体大小 */
 }
 
+/* .label 类用于设置标签（年、月、日）的样式 */
 .label {
-    font-size: 1rem;
-    color: var(--bs-secondary);
-    text-transform: uppercase;
+    font-size: 1rem; /* 字体大小，1rem 表示 1 倍的根字体大小 */
+    color: var(--bs-secondary); /* 字体颜色，使用 Bootstrap 的变量 --bs-secondary，通常表示辅助色 */
+    text-transform: uppercase; /* 将文本转换为大写 */
 }
 
+/* .card 类用于设置卡片（日期信息显示区域）的样式 */
 .card {
-    background: var(--bs-dark);
-    border: 1px solid var(--bs-border-color);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background: var(--bs-dark); /* 背景颜色，使用 Bootstrap 的变量 --bs-dark */
+    border: 1px solid var(--bs-border-color); /* 边框，1px 粗细，实线，颜色使用 Bootstrap 的变量 --bs-border-color */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* 阴影效果，0 0 20px 表示阴影的偏移量和模糊半径，rgba(0, 0, 0, 0.1) 表示阴影颜色为黑色，透明度为 0.1 */
 }
 
+/* .modal-content 类用于设置模态框内容的样式 */
 .modal-content {
-    background: var(--bs-dark);
-    border: 1px solid var(--bs-border-color);
+    background: var(--bs-dark); /* 背景颜色，使用 Bootstrap 的变量 --bs-dark */
+    border: 1px solid var(--bs-border-color); /* 边框，1px 粗细，实线，颜色使用 Bootstrap 的变量 --bs-border-color */
 }
 
+/* .modal-header 类用于设置模态框头部的样式 */
 .modal-header {
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color); /* 下边框，1px 粗细，实线，颜色使用 Bootstrap 的变量 --bs-border-color */
 }
 
+/* input[type="date"] 用于设置日期输入框的样式 */
 input[type="date"] {
-    background-color: var(--bs-dark);
-    border: 1px solid var(--bs-border-color);
-    color: var(--bs-light);
+    background-color: var(--bs-dark); /* 背景颜色，使用 Bootstrap 的变量 --bs-dark */
+    border: 1px solid var(--bs-border-color); /* 边框，1px 粗细，实线，颜色使用 Bootstrap 的变量 --bs-border-color */
+    color: var(--bs-light); /* 字体颜色，使用 Bootstrap 的变量 --bs-light，通常表示浅色字体 */
 }

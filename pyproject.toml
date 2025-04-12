@@ -1,16 +1,32 @@
 [project]
-name = "repl-nix-workspace"
+name = "importantdatescalculator"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.11"
-dependencies = [
-    "email-validator>=2.2.0",
-    "flask-login>=0.6.3",
-    "flask>=3.1.0",
-    "flask-sqlalchemy>=3.1.1",
-    "gunicorn>=23.0.0",
-    "lunar>=0.0.1",
-    "lunardate>=0.2.2",
-    "psycopg2-binary>=2.9.10",
-    "flask-wtf>=1.2.2",
+description = "A Flask app for tracking important lunar calendar dates"
+authors = [
+    {name = "MatthewLGM"}
 ]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "flask (>=3.1.0,<4.0.0)",
+    "logging (>=0.4.9.6,<0.5.0.0)",
+    "datetime (>=5.5,<6.0)",
+    "lunardate (>=0.2.2,<0.3.0)",
+    "flask-sqlalchemy (>=3.1.1,<4.0.0)",
+    "sqlalchemy-orm (>=1.2.10,<2.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+black = "^25.1.0"
+mypy = "^1.15.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
