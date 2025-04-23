@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import logging
 from datetime import datetime
 from lunardate import LunarDate
+# VSCode 编辑框里的 cSpell: Unknown word 是什么呢
 from flask_sqlalchemy import SQLAlchemy
 import os
 from sqlalchemy.orm import DeclarativeBase
@@ -14,7 +15,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-app =         Flask(__name__)
+app = Flask(__name__)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
 
