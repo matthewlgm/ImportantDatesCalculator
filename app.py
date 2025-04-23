@@ -14,7 +14,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-app = Flask(__name__)
+app =         Flask(__name__)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or "a secret key"
 
